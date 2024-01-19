@@ -1,0 +1,6 @@
+info:
+  contact: {}
+  title: Task manager service
+  version: v1.0.0
+paths: {}
+swagger: "2.0"

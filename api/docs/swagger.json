@@ -1,0 +1,9 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Task manager service",
+        "contact": {},
+        "version": "v1.0.0"
+    },
+    "paths": {}
+}
