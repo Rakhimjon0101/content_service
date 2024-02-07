@@ -2,55 +2,68 @@ package bootstrap
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"log"
+	"net/http"
+	"time"
 
-	"projects/content_service/config"
-
-	"github.com/jmoiron/sqlx"
-	"go.uber.org/zap"
+	"projects/content_service/internal/config"
+	"projects/content_service/internal/dbstore"
+	"projects/content_service/internal/gateways/rest"
 
 	"projects/content_service/pkg/logger"
 )
 
-type App struct {
-	restAPI  *rest.Server
-	teardown []func()
+type Application struct {
+	Logger   logger.Logger
+	Config   config.Config
+	RestAPI  *rest.Server
+	Teardown []func()
 }
 
-func New(cfg config.Config) *App {
+func New(cfg config.Config) *Application {
 	teardown := make([]func(), 0)
-	app := new(App)
+	app := Application{Config: cfg}
 
-	gLog := logger.New(cfg.LogLevel, cfg.App, zap.AddCallerSkip(1))
-	teardown = append(teardown, func() { _ = logger.Cleanup() })
-	gLog.Info("Logger init")
+	appLogger := logger.NewApiLogger(&cfg)
 
-	app.log = logger.FromCtx(context.Background(), "bootstrap.New")
+	appLogger.InitLogger()
+	appLogger.Infof("AppVersion: %s, LogLevel: %s, Mode: %s", cfg.AppVersion, cfg.Logger.LogLevel, cfg.Environment)
+	app.Logger = appLogger
 
-	db, repo, c := initRepository(cfg, app.log)
+	db, c := initDB(context.TODO(), app.Logger, cfg.Postgres)
 	teardown = append(teardown, c)
 
-	app.outbox = initOutbox(cfg, app.log, db, amqp)
-	cases := buildUseCases(app.log, repo, app.outbox)
+	storage := dbstore.New(app.Logger, db)
+	useCases := buildUseCases(app.Config, app.Logger, storage)
+	fmt.Println("useCases: ", useCases)
+	app.RestAPI = rest.New(cfg, useCases.Blog)
 
-	app.restAPI = rest.New(cfg, app.outbox)
-
-	app.teardown = teardown
-
-	return app
+	app.Teardown = teardown
+	return &app
 }
 
-func initRepository(cfg config.Config, l logger.Logger) (*sqlx.DB, repository.Container, func()) {
-	client, err := sqlx.Connect("postgres", cfg.PostgresURL())
-	if err != nil {
-		panic(err)
-	}
-
-	r := repository.New(client)
-	l.Debug("repository connected")
-
-	return client, r, func() {
-		if err := client.Close(); err != nil {
-			l.Error("db close error", zap.Error(err))
+// Run application and all its sub core
+func (app *Application) Run(ctx context.Context) {
+	go func() {
+		if err := app.RestAPI.Run(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatalf("Failed To Run REST Server: %s\n", err.Error())
 		}
+		app.Logger.Info("REST Server started at port " + app.Config.HTTPPort)
+	}()
+	app.Teardown = append(app.Teardown, func() {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+		if err := app.RestAPI.Shutdown(ctx); err != nil {
+			app.Logger.Error(fmt.Sprintf("REST Server Graceful Shutdown Failed: %s\n", err))
+		}
+		app.Logger.Info("REST Server Graceful Shutdown")
+	})
+
+	<-ctx.Done()
+	for i := 0; i < len(app.Teardown); i++ {
+		app.Teardown[len(app.Teardown)-1-i]()
 	}
+	app.Logger.Info("Program Gracefully Shut Down")
 }

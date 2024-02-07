@@ -2,17 +2,22 @@ package rest
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
 
+	"projects/content_service/internal/config"
 	"projects/content_service/pkg/logger"
 )
 
-type outbox interface {
-	Run(ctx context.Context) error
-	Clean(ctx context.Context) error
+type blog interface {
+	CreateBlog(ctx context.Context) error
+}
+
+type news interface {
+	CreateNews(ctx context.Context) error
 }
 
 type Server struct {
@@ -21,21 +26,24 @@ type Server struct {
 	router     *gin.Engine
 	httpServer *http.Server
 
-	outbox outbox
+	blog blog
+	news news
 }
 
-func New(cfg config.Config, box outbox) *Server {
+func New(cfg config.Config, usc blog) *Server {
 	r := gin.New()
 	r.Use(gin.Logger(), gin.Recovery())
 
-	l := logger.FromCtx(context.Background(), "gateways.rest")
+	l := logger.NewApiLogger(&cfg)
+	l.InitLogger()
 
 	s := &Server{
 		cfg:    cfg,
 		log:    l,
 		router: r,
-		outbox: box,
+		blog:   usc,
 	}
+
 	s.endpoints()
 
 	s.httpServer = &http.Server{
@@ -43,6 +51,7 @@ func New(cfg config.Config, box outbox) *Server {
 		Handler:           r,
 		ReadHeaderTimeout: time.Second * 10, //nolint:gomnd
 	}
+	l.Info(fmt.Sprintf("HTTP server is initialized on port %s", cfg.HTTPPort))
 	return s
 }
 
