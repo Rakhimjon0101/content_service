@@ -9,11 +9,13 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"projects/content_service/internal/config"
+	"projects/content_service/internal/domains"
 	"projects/content_service/pkg/logger"
 )
 
 type blog interface {
-	CreateBlog(ctx context.Context) error
+	CreateBlog(ctx context.Context, b *domains.Blog) error
+	GetBlogByID(ctx context.Context, id string) (domains.Blog, error)
 }
 
 type news interface {

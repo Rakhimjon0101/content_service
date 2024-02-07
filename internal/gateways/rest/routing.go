@@ -12,4 +12,10 @@ func (s *Server) endpoints() {
 	// back
 	back := s.router.Group("/")
 	back.GET("ping", s.ping)
+
+	// blog
+	blogs := s.router.Group("/blog")
+	blogs.POST("", s.create)
+	//blog.GET("", s.getAll)
+	blogs.GET("/:id", s.getByID)
 }

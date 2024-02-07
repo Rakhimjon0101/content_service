@@ -9,6 +9,8 @@ import (
 const (
 	Success = "Success"
 	Failure = "Failure"
+
+	InternalError = -50
 )
 
 type R struct {

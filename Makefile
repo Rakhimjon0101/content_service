@@ -26,3 +26,9 @@ coverage: ## Generate global code coverage report
 
 lint-go: ## Lint go the files
 	@golangci-lint run ./... || staticcheck -tests=false ./...
+
+migrate-up:
+	migrate -path migrations -database "postgres://admin:147ajt369@localhost:5555/dbo_content_service?sslmode=disable" up
+
+migrate-down:
+	migrate -path migrations -database "postgres://admin:147ajt369@localhost:5555/dbo_content_service?sslmode=disable" down

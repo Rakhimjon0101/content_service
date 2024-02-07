@@ -37,7 +37,7 @@ func New(cfg config.Config) *Application {
 
 	storage := dbstore.New(app.Logger, db)
 	useCases := buildUseCases(app.Config, app.Logger, storage)
-	fmt.Println("useCases: ", useCases)
+
 	app.RestAPI = rest.New(cfg, useCases.Blog)
 
 	app.Teardown = teardown

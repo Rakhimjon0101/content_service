@@ -20,7 +20,6 @@ import (
 // @contact.name Rakhimjon Shokirov
 // @contact.url https://github.com/Rakhimjon0101
 // @contact.email raximvarresult@gmail.com
-// @BasePath /api/v1
 func main() {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)

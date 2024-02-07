@@ -1,6 +1,115 @@
+definitions:
+  rest.R:
+    properties:
+      data: {}
+      error_code:
+        type: integer
+      error_note:
+        type: string
+      status:
+        type: string
+    type: object
+  rest.reqCreateBlog:
+    properties:
+      content:
+        type: string
+      title:
+        type: string
+    required:
+    - content
+    - title
+    type: object
+  views.Blog:
+    properties:
+      content:
+        type: string
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      id:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
 info:
-  contact: {}
-  title: Task manager service
-  version: v1.0.0
-paths: {}
+  contact:
+    email: raximvarresult@gmail.com
+    name: Rakhimjon Shokirov
+    url: https://github.com/Rakhimjon0101
+  description: Golang Content Service
+  title: Go Content Service
+  version: "1.0"
+paths:
+  /blog:
+    post:
+      consumes:
+      - application/json
+      description: create blog
+      parameters:
+      - description: Request to Create a Blog
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/rest.reqCreateBlog'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rest.R'
+            - properties:
+                data:
+                  $ref: '#/definitions/views.Blog'
+              type: object
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/rest.R'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rest.R'
+      summary: blog
+      tags:
+      - blog
+  /blog/{id}:
+    get:
+      consumes:
+      - application/json
+      description: get blog by it`s id
+      parameters:
+      - description: Blog ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rest.R'
+            - properties:
+                data:
+                  $ref: '#/definitions/views.Blog'
+              type: object
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/rest.R'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rest.R'
+      summary: blog
+      tags:
+      - blog
 swagger: "2.0"
