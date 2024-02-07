@@ -44,6 +44,35 @@ info:
   version: "1.0"
 paths:
   /blog:
+    get:
+      consumes:
+      - application/json
+      description: get all blogs
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rest.R'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/views.Blog'
+                  type: array
+              type: object
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/rest.R'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rest.R'
+      summary: blog
+      tags:
+      - blog
     post:
       consumes:
       - application/json

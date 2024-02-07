@@ -53,7 +53,7 @@ func (s *Server) create(c *gin.Context) {
 		Title:     d.Title,
 		Content:   d.Content,
 		CreatedAt: d.CreatedAt,
-		UpdatedAT: d.UpdatedAT,
+		UpdatedAt: d.UpdatedAt,
 	})
 }
 
@@ -83,6 +83,32 @@ func (s *Server) getByID(c *gin.Context) {
 		Title:     b.Title,
 		Content:   b.Content,
 		CreatedAt: b.CreatedAt,
-		UpdatedAT: b.UpdatedAT,
+		UpdatedAt: b.UpdatedAt,
 	})
+}
+
+// blog godoc
+// @Router /blog [GET]
+// @Summary blog
+// @Description get all blogs
+// @Tags blog
+// @Accept json
+// @Produce json
+// @Success 200 {object} R{data=[]views.Blog}
+// @Failure 422 {object} R
+// @Failure 500 {object} R
+func (s *Server) getAll(c *gin.Context) {
+
+	b, err := s.blog.GetBlogs(c.Request.Context())
+	if err != nil {
+		s.handleErrorResponse(c, http.StatusInternalServerError, InternalError, err)
+
+		return
+	}
+
+	resp := make([]views.Blog, len(b))
+	for i := range b {
+		resp[i] = views.Blog(b[i])
+	}
+	s.handleSuccessResponse(c, resp)
 }

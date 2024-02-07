@@ -12,6 +12,7 @@ import (
 type BlogRepo interface {
 	CreateBlog(ctx context.Context, blog *domains.Blog) error
 	GetBlogByID(ctx context.Context, id string) (domains.Blog, error)
+	GetBlogs(ctx context.Context) ([]domains.Blog, error)
 }
 
 type UseCase struct {
@@ -38,6 +39,16 @@ func (s UseCase) GetBlogByID(ctx context.Context, id string) (domains.Blog, erro
 	if err != nil {
 		s.lg.Debug(fmt.Sprintf("blog error while getting %s", err))
 		return b, errs.Errf(err, "error while getting blog by its id")
+	}
+
+	return b, nil
+}
+
+func (s UseCase) GetBlogs(ctx context.Context) ([]domains.Blog, error) {
+	b, err := s.repo.GetBlogs(ctx)
+	if err != nil {
+		s.lg.Debug(fmt.Sprintf("blog error while getting all %s", err))
+		return b, errs.Errf(err, "error while getting all blogs")
 	}
 
 	return b, nil

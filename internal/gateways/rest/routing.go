@@ -16,6 +16,6 @@ func (s *Server) endpoints() {
 	// blog
 	blogs := s.router.Group("/blog")
 	blogs.POST("", s.create)
-	//blog.GET("", s.getAll)
+	blogs.GET("", s.getAll)
 	blogs.GET("/:id", s.getByID)
 }

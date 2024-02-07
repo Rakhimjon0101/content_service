@@ -16,6 +16,7 @@ import (
 type blog interface {
 	CreateBlog(ctx context.Context, b *domains.Blog) error
 	GetBlogByID(ctx context.Context, id string) (domains.Blog, error)
+	GetBlogs(ctx context.Context) ([]domains.Blog, error)
 }
 
 type news interface {

@@ -10,6 +10,6 @@ type Blog struct {
 	Title     string     `db:"title"`
 	Content   string     `db:"content"`
 	CreatedAt *time.Time `db:"created_at"`
-	UpdatedAT *time.Time `db:"updated_at"`
-	DeletedAT *time.Time `db:"deleted_at"`
+	UpdatedAt *time.Time `db:"updated_at"`
+	DeletedAt *time.Time `db:"deleted_at"`
 }
