@@ -10,12 +10,12 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// BlogStorage handles CRUD operations for blogs.
+// Blog handles CRUD operations for blogs.
 type Blog struct {
 	pool *pgxpool.Pool
 }
 
-// NewBlogStorage creates a new BlogStorage instance.
+// NewBlog creates a new BlogStorage instance.
 func NewBlog(pool *pgxpool.Pool) *Blog {
 	return &Blog{pool: pool}
 }
@@ -41,7 +41,7 @@ func (s *Blog) GetBlogByID(ctx context.Context, id string) (domains.Blog, error)
 	return blog, nil
 }
 
-// GetBlogByID get a new blog by it's id.
+// GetBlogs get all blogs
 func (s *Blog) GetBlogs(ctx context.Context) ([]domains.Blog, error) {
 	var (
 		blogs []domains.Blog

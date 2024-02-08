@@ -10,6 +10,7 @@ import (
 	"projects/content_service/api/docs"
 	"projects/content_service/internal/bootstrap"
 	"projects/content_service/internal/config"
+	"projects/content_service/pkg/logger"
 
 	"github.com/sethvargo/go-envconfig"
 )
@@ -32,7 +33,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	app := bootstrap.New(cfg)
+	appLogger := logger.NewApiLogger(&cfg)
+
+	appLogger.InitLogger()
+	appLogger.Infof("AppVersion: %s, LogLevel: %s, Mode: %s", cfg.AppVersion, cfg.Logger.LogLevel, cfg.Environment)
+
+	app := bootstrap.New(cfg, appLogger)
 	app.Logger.Info("[main] Application bootstrapped successfully")
 
 	ctx, cancel := context.WithCancel(context.Background())

@@ -33,16 +33,13 @@ type Server struct {
 	news news
 }
 
-func New(cfg config.Config, usc blog) *Server {
+func New(cfg config.Config, log logger.Logger, usc blog) *Server {
 	r := gin.New()
 	r.Use(gin.Logger(), gin.Recovery())
 
-	l := logger.NewApiLogger(&cfg)
-	l.InitLogger()
-
 	s := &Server{
 		cfg:    cfg,
-		log:    l,
+		log:    log,
 		router: r,
 		blog:   usc,
 	}
@@ -54,7 +51,7 @@ func New(cfg config.Config, usc blog) *Server {
 		Handler:           r,
 		ReadHeaderTimeout: time.Second * 10, //nolint:gomnd
 	}
-	l.Info(fmt.Sprintf("HTTP server is initialized on port %s", cfg.HTTPPort))
+	s.log.Info(fmt.Sprintf("HTTP server is initialized on port %s", cfg.HTTPPort))
 	return s
 }
 

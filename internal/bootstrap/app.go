@@ -22,23 +22,18 @@ type Application struct {
 	Teardown []func()
 }
 
-func New(cfg config.Config) *Application {
+func New(cfg config.Config, log logger.Logger) *Application {
 	teardown := make([]func(), 0)
 	app := Application{Config: cfg}
 
-	appLogger := logger.NewApiLogger(&cfg)
-
-	appLogger.InitLogger()
-	appLogger.Infof("AppVersion: %s, LogLevel: %s, Mode: %s", cfg.AppVersion, cfg.Logger.LogLevel, cfg.Environment)
-	app.Logger = appLogger
-
+	app.Logger = log
 	db, c := initDB(context.TODO(), app.Logger, cfg.Postgres)
 	teardown = append(teardown, c)
 
 	storage := dbstore.New(app.Logger, db)
 	useCases := buildUseCases(app.Config, app.Logger, storage)
 
-	app.RestAPI = rest.New(cfg, useCases.Blog)
+	app.RestAPI = rest.New(cfg, log, useCases.Blog)
 
 	app.Teardown = teardown
 	return &app
